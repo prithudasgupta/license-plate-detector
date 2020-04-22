@@ -6,19 +6,19 @@ def validate_contour(contour, img, aspect_ratio_range, area_range):
     rect = cv2.minAreaRect(contour)
     img_width = img.shape[1]
     img_height = img.shape[0]
-    box = cv2.boxPoints(rect) 
+    box = cv2.boxPoints(rect)
     box = np.int0(box)
 
     X = rect[0][0]
     Y = rect[0][1]
-    angle = rect[2] 
+    angle = rect[2]
     width = rect[1][0]
     height = rect[1][1]
 
     angle = (angle + 180) if width < height else (angle + 90)
 
     output = False
-    
+
     if (width > 0 and height > 0) and ((width < img_width/2.0) and (height < img_width/2.0)):
         aspect_ratio = float(width)/height if width > height else float(height)/width
         if (aspect_ratio >= aspect_ratio_range[0] and aspect_ratio <= aspect_ratio_range[1]):
@@ -54,20 +54,20 @@ def get_bounding_box(img):
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # 2. Apply Guassian blur
-    img_blur = cv2.GaussianBlur(img_gray, (5,5), 0)  
+    img_blur = cv2.GaussianBlur(img_gray, (5,5), 0)
 
     # 3. Vertical sobel
     img_sobel = cv2.Sobel(img_blur, -1, 1, 0)
     h,sobel = cv2.threshold(img_sobel,0,255,cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     se = cv2.getStructuringElement(cv2.MORPH_RECT,(16,4))
-    morph = cv2.morphologyEx(sobel, cv2.MORPH_CLOSE, se) 
+    morph = cv2.morphologyEx(sobel, cv2.MORPH_CLOSE, se)
 
     ed_img = np.copy(morph)
     contours, _ = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    
+
     for contour in contours:
-        rect = cv2.minAreaRect(contour)  
+        rect = cv2.minAreaRect(contour)
         box = cv2.boxPoints(rect)
         aspect_ratio_range = (1, 12)
         area_range = (500, 18000)
@@ -82,14 +82,14 @@ def get_bounding_box(img):
 
             angle = rect[2]
             if angle < -45:
-                angle += 90 
+                angle += 90
 
             w = rect[1][0]
             h = rect[1][1]
             if w == 0 or h == 0:
                 continue
             aspect_ratio = float(w) / h if w > h else float(h) / w
-            
+
             center = ((x1+x2)/2,(y1+y2)/2)
             size = (x2-x1, y2-y1)
 
@@ -109,28 +109,15 @@ def get_bounding_box(img):
                 for y in range(tmp.shape[1]):
                     if tmp[x][y] == 255:
                         white_pixels += 1
-      
+
             edge_density = float(white_pixels) / (tmp.shape[0] * tmp.shape[1])
             print(edge_density)
 
             # BELOW NEEDS TO BE MORE SOPHISTICATED FOR DIFFIRENTIATING FALSE POSITIVES/NEGATIVES
-            if edge_density > 0.45: 
+            if edge_density > 0.45:
                 cv2.drawContours(output_image, [box.astype(int)], 0, (127,0,255),2)
                 results.append(box)
 
     cv2.imshow('image',output_image)
     cv2.waitKey(0)
     return results
-
-
-def main():
-    img = cv2.imread('testImage.jpg',1)
-    img = cv2.imread('0b86cecf-67d1-4fc0-87c9-b36b0ee228bb.jpg', 1)
-    img = cv2.imread('12c6cb72-3ea3-49e7-b381-e0cdfc5e8960.jpg', 1)
-    img = cv2.imread('12c6cb72-3ea3-49e7-b381-e0cdfc5e8960.jpg', 1)
-    img = cv2.imread('1e241dc8-8f18-4955-8988-03a0ab49f813.jpg', 1)
-    res = get_bounding_box(img)
-
-main()
-
-
