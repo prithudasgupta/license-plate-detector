@@ -1,9 +1,8 @@
 import tensorflow as tf
+from tensorflow.keras import Model
 import hyperparameters as hp
 from tensorflow.keras.layers import \
         Conv2D, MaxPool2D, Dropout, Flatten, Dense, Reshape, Softmax
-
-voc_size = 36
 
 class Model(tf.keras.Model):
     """ 
@@ -23,32 +22,33 @@ class Model(tf.keras.Model):
         # last dense layer should be seq_len * vocab_size
         self.seq_len = seq_len
         self.vocab_size = vocab_size
-        voc_size = vocab_size
 
         self.optimizer = tf.keras.optimizers.RMSprop(
             learning_rate=hp.learning_rate,
             momentum=hp.momentum)
 
-        self.architecture = [
-            Conv2D(96, 11, strides=4, padding="same", activation="relu"),
-            Conv2D(256, 5, strides=2, padding="same", activation="relu"),
-            MaxPool2D(2),
-            Flatten(),
-            Dropout(0.3),
-            Dense(1024, activation="relu"),
-            Dense(self.seq_len * self.vocab_size),
-            Reshape((self.seq_len, self.vocab_size)),
-            Softmax(axis=-1)
-        ]
+        model = tf.keras.Sequential()
+        model.add(Conv2D(96, 11, strides=4, padding="same", activation="relu"))
+        model.add(Conv2D(256, 5, strides=2, padding="same", activation="relu"))
+        model.add(MaxPool2D(2))
+        model.add(Flatten())
+        model.add(Dropout(0.3))
+        model.add(Dense(1024, activation="relu"))
+        model.add(Dense(self.seq_len * self.vocab_size))
+        model.add(Reshape((self.seq_len, self.vocab_size)))
+        model.add(Softmax(axis=-1))
 
+        self.model = model
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
+        self.batch_size = 32
+
+    @tf.function
     def call(self, img):
-        for layer in self.architecture:
-            img = layer(img)
-        return img
+        return self.model(img)
 
 
-    @staticmethod
-    def loss_fn(labels, predictions):
+    @tf.function
+    def loss(self, logits, labels):
         """ 
         Loss function for the model. 
         
@@ -56,7 +56,11 @@ class Model(tf.keras.Model):
         Predictions are batch_size by seq_len by vocab_size
         """
         flattened_labels = tf.reshape(labels, [-1])
-        # Probably a better way to write this but this should work for now
-        flattened_predictions = tf.reshape(predictions, [-1, voc_size])
+        flattened_predictions = tf.reshape(logits, [-1, self.vocab_size])
         return tf.keras.losses.sparse_categorical_crossentropy(
             flattened_labels, flattened_predictions, from_logits=False)
+
+
+    @tf.function
+    def accuracy(self, logits, labels):
+        return 1
