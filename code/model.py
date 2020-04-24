@@ -5,9 +5,9 @@ from tensorflow.keras.layers import \
         Conv2D, MaxPool2D, Dropout, Flatten, Dense, Reshape, Softmax
 
 class Model(tf.keras.Model):
-    """ 
-    NN model for license plate detection 
-    
+    """
+    NN model for license plate detection
+
     seq_len: Number of characters in license plate (~6/7)
     vocab_size: Number of possible characters (~(26 + 10))
 
@@ -23,10 +23,6 @@ class Model(tf.keras.Model):
         self.seq_len = seq_len
         self.vocab_size = vocab_size
 
-        self.optimizer = tf.keras.optimizers.RMSprop(
-            learning_rate=hp.learning_rate,
-            momentum=hp.momentum)
-
         model = tf.keras.Sequential()
         model.add(Conv2D(96, 11, strides=4, padding="same", activation="relu"))
         model.add(Conv2D(256, 5, strides=2, padding="same", activation="relu"))
@@ -39,7 +35,7 @@ class Model(tf.keras.Model):
         model.add(Softmax(axis=-1))
 
         self.model = model
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
+        self.optimizer =tf.keras.optimizers.Adam(learning_rate=hp.learning_rate)
         self.batch_size = 32
 
     @tf.function
@@ -49,9 +45,9 @@ class Model(tf.keras.Model):
 
     @tf.function
     def loss(self, logits, labels):
-        """ 
-        Loss function for the model. 
-        
+        """
+        Loss function for the model.
+
         Labels are batch_size by seq_len
         Predictions are batch_size by seq_len by vocab_size
         """
@@ -63,4 +59,8 @@ class Model(tf.keras.Model):
 
     @tf.function
     def accuracy(self, logits, labels):
-        return 1
+        count = 0.0
+        max = tf.argmax(logits, 2)
+        equals = tf.equal(max, labels)
+
+        return tf.reduce_mean(tf.cast(equals, tf.float32))

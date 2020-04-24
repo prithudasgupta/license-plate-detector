@@ -19,28 +19,29 @@ def train(model, train_inputs, train_labels):
         with tf.GradientTape() as tape:
             logits = model.call(train_inputs[batch_num : batch_num + model.batch_size])
             loss = model.loss(logits, train_labels[batch_num : batch_num + model.batch_size])
-            print(loss)
+            #print(loss)
         gradients = tape.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
 
-def test(model, test_data):
-    model.evaluate(
-        x=test_data,
-        verbose=1,
-    )
+def test(model, test_inputs, test_labels):
+    p = model.call(test_inputs)
+    return model.accuracy(p, test_labels)
 
 def main():
 
     # Take note of how txt file in data directory must be formatted for every jpg file included in dataset!! Also, as of rn, must be jpg file but not hard to incorporate other file types.
     train_images, train_labels, test_images, test_labels = preprocess.parse_images_and_labels(DATA_DIR, TRAIN_TEST_RATIO)
-    print(train_images.shape)
-    print(train_labels.shape)
-    print(test_images.shape)
-    print(test_labels.shape)
+    # print(train_images.shape)
+    # print(train_labels.shape)
+    # print(test_images.shape)
+    # print(test_labels.shape)
 
     model = Model(SEQ_LEN, VOCAB_SIZE)
     train(model, train_images, train_labels)
+
+    acc = test(model, test_images, test_labels)
+    print(acc)
 
 if __name__ == "__main__":
     main()
