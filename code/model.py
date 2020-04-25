@@ -61,6 +61,17 @@ class Model(tf.keras.Model):
     def accuracy(self, logits, labels):
         count = 0.0
         max = tf.argmax(logits, 2)
-        equals = tf.equal(max, labels)
+        # IF CHARACTER ACCURACY USE THIS hp.by_plate:
+        if not hp.by_plate:
+            equals = tf.equal(max, labels)
+            res = tf.reduce_mean(tf.cast(equals, tf.float32))
 
-        return tf.reduce_mean(tf.cast(equals, tf.float32))
+        # PLATE ACCURACY USE THIS:
+        else:
+            for num in range(0,len(labels)):
+                equals = tf.equal(max[num], labels[num])
+                equals = tf.reduce_sum(tf.cast(equals, tf.float32))
+                if equals == len(labels[num]):
+                    count = count + 1.0
+            res = count/len(labels)
+        return res
