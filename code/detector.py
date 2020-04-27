@@ -40,6 +40,18 @@ def validate_contour(contour, img, aspect_ratio_range, area_range):
                     output = True
     return output
 
+def getSubImage(rect, src):
+    # Get center, size, and angle from rect
+    center, size, theta = rect
+    # Convert to int 
+    center, size = tuple(map(int, center)), tuple(map(int, size))
+    # Get rotation matrix for rectangle
+    M = cv2.getRotationMatrix2D( center, theta, 1)
+    # Perform rotation on src image
+    dst = cv2.warpAffine(src, M, src.shape[:2])
+    out = cv2.getRectSubPix(dst, size, center)
+    return out
+
 def get_bounding_box(img):
     '''
     Given image of a potential car,
@@ -65,7 +77,8 @@ def get_bounding_box(img):
 
     ed_img = np.copy(morph)
     contours, _ = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
+    best_image = None
+    best_contrast = -1
     for contour in contours:
         rect = cv2.minAreaRect(contour)
         box = cv2.boxPoints(rect)
@@ -111,13 +124,28 @@ def get_bounding_box(img):
                         white_pixels += 1
 
             edge_density = float(white_pixels) / (tmp.shape[0] * tmp.shape[1])
-            print(edge_density)
 
             # BELOW NEEDS TO BE MORE SOPHISTICATED FOR DIFFIRENTIATING FALSE POSITIVES/NEGATIVES
             if edge_density > 0.45:
-                cv2.drawContours(output_image, [box.astype(int)], 0, (127,0,255),2)
-                results.append(box)
+                img_crop = getSubImage(rect, img)
+                contrast = img_crop.std()
+                print(contrast)
+                if contrast > best_contrast:
+                    best_image = img_crop
+                    best_contrast = contrast
+                    cv2.drawContours(output_image, [box.astype(int)], 0, (127,0,255),2)
+                    results.append(box)
 
     cv2.imshow('image',output_image)
     cv2.waitKey(0)
-    return results
+    cv2.imshow('image',best_image)
+    cv2.waitKey(0)
+    return best_image
+
+def main():
+    img = cv2.imread("/Users/prithudasgupta/spring-20/cs143/project/license-plate-detector/code/data/7fbfbe28-aecb-45be-bd05-7cf26acb3c5c.jpg", 1)
+    res = get_bounding_box(img)
+    print(res)
+
+
+main()

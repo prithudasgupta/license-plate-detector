@@ -35,7 +35,7 @@ class Model(tf.keras.Model):
         model.add(Softmax(axis=-1))
 
         self.model = model
-        self.optimizer =tf.keras.optimizers.Adam(learning_rate=hp.learning_rate)
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=hp.learning_rate)
         self.batch_size = 32
 
     @tf.function
