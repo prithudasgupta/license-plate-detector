@@ -2,7 +2,9 @@ import cv2
 import numpy as np
 import math
 import preprocess
-from detector import (validate_contour, get_bounding_box)
+import preprocess_plates
+import glob
+#from detector import (validate_contour, get_bounding_box)
 from model import Model
 import hyperparameters as hp
 import tensorflow as tf
@@ -29,6 +31,8 @@ def test(model, test_inputs, test_labels):
     return model.accuracy(p, test_labels)
 
 def main():
+    # Use this to train on license plate data only
+    #train_images, train_labels, test_images, test_labels = preprocess_plates.parse_images_and_labels('data_license_only/trainVal.csv', TRAIN_TEST_RATIO)
 
     # Take note of how txt file in data directory must be formatted for every jpg file included in dataset!! Also, as of rn, must be jpg file but not hard to incorporate other file types.
     train_images, train_labels, test_images, test_labels = preprocess.parse_images_and_labels(DATA_DIR, TRAIN_TEST_RATIO)

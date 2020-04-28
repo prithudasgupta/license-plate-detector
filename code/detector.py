@@ -43,7 +43,7 @@ def validate_contour(contour, img, aspect_ratio_range, area_range):
 def getSubImage(rect, src):
     # Get center, size, and angle from rect
     center, size, theta = rect
-    # Convert to int 
+    # Convert to int
     center, size = tuple(map(int, center)), tuple(map(int, size))
     # Get rotation matrix for rectangle
     M = cv2.getRotationMatrix2D( center, theta, 1)

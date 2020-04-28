@@ -19,8 +19,8 @@ def parse_images_and_labels(directory, train_test_ratio):
         img = cv2.imread(file_path, 1)
         img = np.float32(img)
 
-        # TODO: Detector, parsing, and resizing should go here 
-        img = cv2.resize(img, (100, 100)) 
+        # TODO: Detector, parsing, and resizing should go here
+        img = cv2.resize(img, (100, 100))
 
 
         images.append(img)
@@ -39,7 +39,7 @@ def parse_images_and_labels(directory, train_test_ratio):
                 plate_label = f.readline().split()[5]
 
                 # Covert license plate string to an array of seq_len unique ids based on characters
-                spliced_characters = list(plate_label) 
+                spliced_characters = list(plate_label)
                 for i in range(len(spliced_characters)):
                     if not word2id.get(spliced_characters[i]):
                         word2id[spliced_characters[i]] = vocab_size
@@ -75,5 +75,3 @@ def split_train_test(images, labels, ratio):
     images = images[s]
     labels = labels[s]
     return images[num_test:], labels[num_test:], images[:num_test], labels[:num_test]
-
-
