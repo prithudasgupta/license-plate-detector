@@ -3,6 +3,12 @@ from matplotlib import pyplot as plt
 from copy import deepcopy, copy
 
 
+def cropCharacter(img, dimensions):
+		[x,y,w,h] = dimensions
+		character = deepcopy(img)
+		character = deepcopy(character[y:y+h,x:x+w])
+		return character
+
 def findCharacterContour(img):
     cv2.imshow('image',img)
     cv2.waitKey(0)
@@ -32,6 +38,8 @@ def findCharacterContour(img):
             cv2.waitKey(0)
 
     print("%s plate characters found", str(len(plate_characters)))
+		
+
 
 #histogram(cv2.imread("data_license_only/crop_h1/I00000.png", 1))
 findCharacterContour(cv2.imread("data_license_only/crop_h1/I00000.png", 1))
