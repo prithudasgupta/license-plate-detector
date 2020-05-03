@@ -1,8 +1,6 @@
 import glob, io, cv2, numpy as np
 from csv import reader
-
-# Should change so this is calculated on the fly
-SEQ_LEN = 8
+from segmentation import findCharacterContour
 
 def parse_images_and_labels(directory, train_test_ratio):
 
@@ -11,7 +9,7 @@ def parse_images_and_labels(directory, train_test_ratio):
     labels = []
 
     word2id = {}
-    vocab_size = 1
+    vocab_size = 0
 
     vals = open(directory, 'r')
     lines = reader(vals)
@@ -21,35 +19,24 @@ def parse_images_and_labels(directory, train_test_ratio):
         if count == 1:
             continue
         file_path = row[1]
+        plate_number = row[2]
         file_path = file_path.replace("./crop", "./data_license_only/crop")
 
         img = cv2.imread(file_path, 1)
-        img = np.float32(img)
-
-        # TODO: Detector, parsing, and resizing should go here
-        img = cv2.resize(img, (100, 100))
-
-        images.append(img)
-
-        image_filepaths.append(file_path)
-
-        plate_label = row[2]
-
-        # Covert license plate string to an array of seq_len unique ids based on characters
-        spliced_characters = list(plate_label)
-        for i in range(len(spliced_characters)):
-            if not word2id.get(spliced_characters[i]):
-                word2id[spliced_characters[i]] = vocab_size
+        character_contours = findCharacterContour(img)
+        
+        for i in range(min(len(character_contours), len(plate_number))):
+            images.append(np.reshape(character_contours[i, :, :], (1, 50, 100)))
+            curr_char = plate_number[i]
+            if not word2id.get(curr_char):
+                word2id[curr_char] = vocab_size
                 vocab_size = vocab_size + 1
-            spliced_characters[i] = word2id[spliced_characters[i]]
-        while len(spliced_characters) < SEQ_LEN:
-            # 0 is padding token
-            spliced_characters.append(0)
-
-        labels.append(spliced_characters)
+            labels.append(word2id[curr_char])
 
     images = np.array(images)
     labels = np.array(labels)
+    print(images.shape)
+    print(labels.shape)
     assert len(images) == len(labels)
 
     # Split into train and test sets

@@ -14,46 +14,11 @@ def cropCharacter(img, dimensions):
     character = deepcopy(character[y:y + h, x:x + w])
     return character
 
-#OLD SEGMENTATION
-# def findCharacterContour(img):
-#     cv2.imshow('image', img)
-#     cv2.waitKey(0)
-#     plate_characters = []
-#     gray_plate = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-#     gray_plate = cv2.GaussianBlur(gray_plate, (3, 3), 0)
-#
-#     _, threshold = cv2.threshold(gray_plate, 140, 255, 0)
-#     contours, _ = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-#     sorted_ctrs = sorted(contours, key=lambda ctr: cv2.boundingRect(ctr)[1])
-#
-#     w, h, x, y = 0, 0, 0, 0
-#
-#     print("%s contours found.", str(len(contours)))
-#     for contour in sorted_ctrs:
-#         area = cv2.contourArea(contour)
-#
-#         # rough range of areas of a plate number
-#         if area > 120 and area < 2000:
-#             [x, y, w, h] = cv2.boundingRect(contour)
-#
-#         # rough dimensions of a character
-#         if h > 20 and h < 90 and w > 10 and w < 50:
-#             character = cropCharacter(img, [x, y, w, h])
-#             plate_characters.append(character)
-#             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 1)
-#             cv2.imshow('image', character)
-#             cv2.waitKey(0)
-#
-#     cv2.imshow('image', img)
-#     cv2.waitKey(0)
-#     print("%s plate characters found", str(len(plate_characters)))
-
-
 def clean_image(img):
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 
-    #PLAY AROUND WITH THESE RESIZING AND CLEANING
+    #TODO: PLAY AROUND WITH THESE RESIZING AND CLEANING
     resized_img = cv2.resize(gray_img
         , None
         , fx=4.0
@@ -76,11 +41,11 @@ def clean_image(img):
     return mask
 
 def findCharacterContour(img):
-    cv2.imshow('image', img)
-    cv2.waitKey(0)
+    # cv2.imshow('image', img)
+    # cv2.waitKey(0)
     img = clean_image(img)
-    cv2.imshow('image', img)
-    cv2.waitKey(0)
+    # cv2.imshow('image', img)
+    # cv2.waitKey(0)
 
     plate_characters = []
     bw_image = cv2.bitwise_not(img)
@@ -92,8 +57,7 @@ def findCharacterContour(img):
         x,y,w,h = cv2.boundingRect(contour)
         area = cv2.contourArea(contour)
         center = (x + w/2, y + h/2)
-        print(area)
-        # PLAY AROUND WITH THESE CHECKS
+        # TODO: PLAY AROUND WITH THESE CHECKS
         if (area > 2000) and (area < 15000) and w < h:
             x,y,w,h = x-4, y-4, w+8, h+8
             bounding_boxes.append((center, (x,y,w,h)))
@@ -106,13 +70,14 @@ def findCharacterContour(img):
     for center, bbox in bounding_boxes:
         x,y,w,h = bbox
         char_image = clean[y:y+h,x:x+w]
-        cv2.imshow('image', char_image)
-        cv2.waitKey(0)
+        char_image = cv2.resize(char_image, (50, 100))
+        # cv2.imshow('image', char_image)
+        # cv2.waitKey(0)
         plate_characters.append(char_image)
 
-    return plate_characters
+    return np.array(plate_characters)
 
-#Copied
+
 def reduce_colors(img, n):
     Z = img.reshape((-1,3))
 
@@ -131,8 +96,8 @@ def reduce_colors(img, n):
 
     return res2
 
-for filename in os.listdir('data_license_only/crop_h1/'):
-    if filename.endswith(".png"):
-        print(filename)
-        findCharacterContour(cv2.imread('data_license_only/crop_h1/' + filename, 1))
-#findCharacterContour(cv2.imread("data_license_only/crop_h1/I00000.png", 1))
+# for filename in os.listdir('data_license_only/crop_h1/'):
+#     if filename.endswith(".png"):
+#         print(filename)
+#         findCharacterContour(cv2.imread('data_license_only/crop_h1/' + filename, 1))
+

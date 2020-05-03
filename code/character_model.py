@@ -4,11 +4,11 @@ import hyperparameters as hp
 from tensorflow.keras.layers import \
         Conv2D, MaxPool2D, Dropout, Flatten, Dense
 
-class Model(tf.keras.Model):
+class CharacterModel(tf.keras.Model):
     """
     NN model for license plate detection on a single character
     """
-    def __init__(self, seq_len):
+    def __init__(self):
         super(Model, self).__init__()
 
         model = tf.keras.Sequential()
