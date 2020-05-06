@@ -21,8 +21,8 @@ def clean_image(img):
     #TODO: PLAY AROUND WITH THESE RESIZING AND CLEANING
     resized_img = cv2.resize(gray_img
         , None
-        , fx=4.0
-        , fy=2.0
+        , fx=12.0
+        , fy=12.0
         , interpolation=cv2.INTER_CUBIC)
 
     resized_img = cv2.GaussianBlur(resized_img,(5,5),0)
@@ -41,11 +41,16 @@ def clean_image(img):
     return mask
 
 def findCharacterContour(img):
-    # cv2.imshow('image', img)
-    # cv2.waitKey(0)
+    cv2.imshow('image', img)
+    cv2.waitKey(0)
     img = clean_image(img)
     # cv2.imshow('image', img)
     # cv2.waitKey(0)
+
+    height, width = img.shape
+    img_area = height * width
+    # print("height", height)
+    # print("width", width)
 
     plate_characters = []
     bw_image = cv2.bitwise_not(img)
@@ -58,7 +63,10 @@ def findCharacterContour(img):
         area = cv2.contourArea(contour)
         center = (x + w/2, y + h/2)
         # TODO: PLAY AROUND WITH THESE CHECKS
-        if (area > 2000) and (area < 15000) and w < h:
+        # print(float(area/img_area))
+        # print("w:", w, "and h", h)
+        if (float(area/img_area) > 0.008) and (float(area/img_area) < 0.032) and h > w:
+            print(area)
             x,y,w,h = x-4, y-4, w+8, h+8
             bounding_boxes.append((center, (x,y,w,h)))
             cv2.rectangle(char_mask,(x,y),(x+w,y+h),255,-1)
@@ -71,8 +79,8 @@ def findCharacterContour(img):
         x,y,w,h = bbox
         char_image = clean[y:y+h,x:x+w]
         char_image = cv2.resize(char_image, (50, 100))
-        # cv2.imshow('image', char_image)
-        # cv2.waitKey(0)
+        cv2.imshow('image', char_image)
+        cv2.waitKey(0)
         plate_characters.append(char_image)
 
     return np.array(plate_characters)
@@ -96,8 +104,8 @@ def reduce_colors(img, n):
 
     return res2
 
-# for filename in os.listdir('data_license_only/crop_h1/'):
-#     if filename.endswith(".png"):
-#         print(filename)
-#         findCharacterContour(cv2.imread('data_license_only/crop_h1/' + filename, 1))
+for filename in os.listdir('data_license_only/crop_h1/'):
+    if filename.endswith(".png"):
+        print(filename)
+        findCharacterContour(cv2.imread('data_license_only/crop_h1/' + filename, 1))
 
