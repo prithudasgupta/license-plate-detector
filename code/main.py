@@ -38,20 +38,12 @@ def main():
 
     # Take note of how txt file in data directory must be formatted for every jpg file included in dataset!! Also, as of rn, must be jpg file but not hard to incorporate other file types.
     # train_images, train_labels, test_images, test_labels = preprocess.parse_images_and_labels(DATA_DIR, TRAIN_TEST_RATIO)
-    # # print(train_images.shape)
-    # # print(train_labels.shape)
-    # # print(test_images.shape)
-    # # print(test_labels.shape)
-
-    # model = Model(SEQ_LEN, VOCAB_SIZE)
-    # train(model, train_images, train_labels)
-
-    # acc = test(model, test_images, test_labels)
-    # print(acc)
 
     train_images, train_labels, test_images, test_labels = preprocess_plates.parse_images_and_labels(DATA_DIR_LICENSE_ONLY, TRAIN_TEST_RATIO)
     model = CharacterModel()
     train(model, train_images, train_labels)
+    acc = test(model, test_images, test_labels)
+    print(acc)
 
 
 

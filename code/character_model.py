@@ -44,4 +44,12 @@ class CharacterModel(tf.keras.Model):
 
     @tf.function
     def accuracy(self, logits, labels):
-        pass
+        count = 0.0
+        max = tf.argmax(logits, 1)
+        for num in range(0,len(labels)):
+            print(max[num])
+            print(labels[num])
+            if max[num] == labels[num]:
+                count = count + 1.0
+        res = count/len(labels)
+        return res

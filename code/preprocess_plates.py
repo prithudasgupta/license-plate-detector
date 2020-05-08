@@ -1,6 +1,7 @@
 import glob, io, cv2, numpy as np
 from csv import reader
 from segmentation import findCharacterContour
+import tensorflow as tf
 
 def parse_images_and_labels(directory, train_test_ratio):
 
@@ -26,7 +27,10 @@ def parse_images_and_labels(directory, train_test_ratio):
         character_contours = findCharacterContour(img)
         
         for i in range(min(len(character_contours), len(plate_number))):
-            images.append(np.reshape(character_contours[i, :, :], (1, 50, 100)))
+            print(plate_number[i])
+            cv2.imshow('image', character_contours[i, :, :])
+            cv2.waitKey(0)
+            images.append(tf.cast(np.reshape(character_contours[i, :, :], (50, 100, 1)), tf.float32))
             curr_char = plate_number[i]
             if not word2id.get(curr_char):
                 word2id[curr_char] = vocab_size

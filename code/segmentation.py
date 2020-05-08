@@ -41,8 +41,8 @@ def clean_image(img):
     return mask
 
 def findCharacterContour(img):
-    cv2.imshow('image', img)
-    cv2.waitKey(0)
+    # cv2.imshow('image', img)
+    # cv2.waitKey(0)
     img = clean_image(img)
     # cv2.imshow('image', img)
     # cv2.waitKey(0)
@@ -66,7 +66,6 @@ def findCharacterContour(img):
         # print(float(area/img_area))
         # print("w:", w, "and h", h)
         if (float(area/img_area) > 0.008) and (float(area/img_area) < 0.032) and h > w:
-            print(area)
             x,y,w,h = x-4, y-4, w+8, h+8
             bounding_boxes.append((center, (x,y,w,h)))
             cv2.rectangle(char_mask,(x,y),(x+w,y+h),255,-1)
@@ -79,8 +78,8 @@ def findCharacterContour(img):
         x,y,w,h = bbox
         char_image = clean[y:y+h,x:x+w]
         char_image = cv2.resize(char_image, (50, 100))
-        cv2.imshow('image', char_image)
-        cv2.waitKey(0)
+        # cv2.imshow('image', char_image)
+        # cv2.waitKey(0)
         plate_characters.append(char_image)
 
     return np.array(plate_characters)
@@ -104,8 +103,8 @@ def reduce_colors(img, n):
 
     return res2
 
-for filename in os.listdir('data_license_only/crop_h1/'):
-    if filename.endswith(".png"):
-        print(filename)
-        findCharacterContour(cv2.imread('data_license_only/crop_h1/' + filename, 1))
+# for filename in os.listdir('data_license_only/crop_h1/'):
+#     if filename.endswith(".png"):
+#         print(filename)
+#         findCharacterContour(cv2.imread('data_license_only/crop_h1/' + filename, 1))
 
