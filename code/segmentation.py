@@ -13,6 +13,13 @@ def cropCharacter(img, dimensions):
     return character
 
 def clean_image(img):
+    h, w, c = img.shape
+    cv2.imshow('img', img)
+    cv2.waitKey(0)
+    if h > w:
+        img = np.rot90(img)
+        # cv2.imshow('img', img)
+        # cv2.waitKey(0)
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 
@@ -48,7 +55,7 @@ def findCharacterContour(img):
 
     plate_characters = []
     bw_image = cv2.bitwise_not(img)
-    _, contours, _ = cv2.findContours(bw_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    contours, _ = cv2.findContours(bw_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
     char_mask = np.zeros_like(img)
     bounding_boxes = []
@@ -70,7 +77,7 @@ def findCharacterContour(img):
 
     for center, bbox in bounding_boxes:
         x,y,w,h = bbox
-        char_image = clean[y:y+h,x:x+w]
+        char_image = clean[y : max(y+h, clean.shape[0]), x : max(x+w, clean.shape[1])]
         char_image = cv2.resize(char_image, (50, 100))
         # cv2.imshow('image', char_image)
         # cv2.waitKey(0)

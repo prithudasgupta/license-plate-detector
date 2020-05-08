@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import math
 
+from segmentation import findCharacterContour
+
 def validate_contour(contour, img, aspect_ratio_range, area_range):
     rect = cv2.minAreaRect(contour)
     img_width = img.shape[1]
@@ -125,9 +127,17 @@ def get_bounding_box(img):
 
             edge_density = float(white_pixels) / (tmp.shape[0] * tmp.shape[1])
 
-            # BELOW NEEDS TO BE MORE SOPHISTICATED FOR DIFFIRENTIATING FALSE POSITIVES/NEGATIVES
+            # separate out false positives
             if edge_density > 0.45:
                 img_crop = getSubImage(rect, img)
+                h, w, c = img_crop.shape
+                if h > w:
+                    img_crop = np.rot90(img_crop)
+                plate_chars = findCharacterContour(img_crop)
+                right_chars = plate_chars.shape[0] >= 3 and plate_chars.shape[0] <= 8
+                # print('plate_chars.shape', plate_chars.shape)
+                if not right_chars:
+                    continue
                 contrast = img_crop.std()
                 print(contrast)
                 if contrast > best_contrast:
@@ -143,7 +153,7 @@ def get_bounding_box(img):
     return best_image
 
 def main():
-    img = cv2.imread("/Users/prithudasgupta/spring-20/cs143/project/license-plate-detector/code/data/7fbfbe28-aecb-45be-bd05-7cf26acb3c5c.jpg", 1)
+    img = cv2.imread("/Users/spencergreene/Github/license-plate-detector/code/data/4be2025c-09f7-4bb0-b1bd-8e8633e6dec1.jpg", 1)
     res = get_bounding_box(img)
     print(res)
 
