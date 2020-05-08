@@ -17,11 +17,7 @@ def clean_image(img):
 
 
     #TODO: PLAY AROUND WITH THESE RESIZING AND CLEANING
-    resized_img = cv2.resize(gray_img
-        , None
-        , fx=12.0
-        , fy=12.0
-        , interpolation=cv2.INTER_CUBIC)
+    resized_img = cv2.resize(gray_img, None, fx=12.0, fy=12.0, interpolation=cv2.INTER_CUBIC)
 
     resized_img = cv2.GaussianBlur(resized_img,(5,5),0)
 
