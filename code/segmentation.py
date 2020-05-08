@@ -1,8 +1,6 @@
 import glob, io, cv2, numpy as np
 from matplotlib import pyplot as plt
 from copy import deepcopy, copy
-from imutils import perspective
-import imutils
 from skimage.filters import threshold_local
 from skimage import measure
 import os
@@ -21,8 +19,8 @@ def clean_image(img):
     #TODO: PLAY AROUND WITH THESE RESIZING AND CLEANING
     resized_img = cv2.resize(gray_img
         , None
-        , fx=4.0
-        , fy=2.0
+        , fx=12.0
+        , fy=12.0
         , interpolation=cv2.INTER_CUBIC)
 
     resized_img = cv2.GaussianBlur(resized_img,(5,5),0)
@@ -47,9 +45,14 @@ def findCharacterContour(img):
     # cv2.imshow('image', img)
     # cv2.waitKey(0)
 
+    height, width = img.shape
+    img_area = height * width
+    # print("height", height)
+    # print("width", width)
+
     plate_characters = []
     bw_image = cv2.bitwise_not(img)
-    contours = cv2.findContours(bw_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)[0]
+    _, contours, _ = cv2.findContours(bw_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
     char_mask = np.zeros_like(img)
     bounding_boxes = []
@@ -58,7 +61,9 @@ def findCharacterContour(img):
         area = cv2.contourArea(contour)
         center = (x + w/2, y + h/2)
         # TODO: PLAY AROUND WITH THESE CHECKS
-        if (area > 2000) and (area < 15000) and w < h:
+        # print(float(area/img_area))
+        # print("w:", w, "and h", h)
+        if (float(area/img_area) > 0.008) and (float(area/img_area) < 0.032) and h > w:
             x,y,w,h = x-4, y-4, w+8, h+8
             bounding_boxes.append((center, (x,y,w,h)))
             cv2.rectangle(char_mask,(x,y),(x+w,y+h),255,-1)
