@@ -1,8 +1,6 @@
 import glob, io, cv2, numpy as np
 from matplotlib import pyplot as plt
 from copy import deepcopy, copy
-from imutils import perspective
-import imutils
 from skimage.filters import threshold_local
 from skimage import measure
 import os
@@ -54,7 +52,7 @@ def findCharacterContour(img):
 
     plate_characters = []
     bw_image = cv2.bitwise_not(img)
-    contours = cv2.findContours(bw_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)[0]
+    _, contours, _ = cv2.findContours(bw_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
     char_mask = np.zeros_like(img)
     bounding_boxes = []

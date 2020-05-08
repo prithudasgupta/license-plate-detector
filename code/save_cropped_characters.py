@@ -8,7 +8,7 @@ lines = reader(vals)
 count = 0
 for row in lines:
     count += 1
-    if count == 1:
+    if count < 461:
         continue
 
     file_path = row[1]
@@ -19,6 +19,6 @@ for row in lines:
     character_contours = findCharacterContour(img)
 
     for i in range(min(len(character_contours), len(plate_number))):
-        file_name = 'data_segmented/' + str(count) + '_' + plate_number[i]  + '.jpg'
+        file_name = 'data_segmented/' + str(count) + '_' + str(i) + '_' + plate_number[i]  + '.jpg'
         cv2.imwrite(file_name, character_contours[i, :, :])
         print("Wrote to file " + str(file_name))
