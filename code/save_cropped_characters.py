@@ -3,12 +3,13 @@ from csv import reader
 from segmentation import findCharacterContour
 import tensorflow as tf
 
+# Script to convert segmented characters into jpg files
 vals = open('data_license_only/trainVal.csv', 'r')
 lines = reader(vals)
 count = 0
 for row in lines:
     count += 1
-    if count < 461:
+    if count == 1:
         continue
 
     file_path = row[1]

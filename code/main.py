@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import math
 import preprocess
-import preprocess_plates
 import glob
 #from detector import (validate_contour, get_bounding_box)
 from model import Model
@@ -10,22 +9,27 @@ import hyperparameters as hp
 import tensorflow as tf
 from character_model import CharacterModel
 
-DATA_DIR = 'data/'
+DATA_DIR_BACKGROUNDS = 'data_backgrounds/'
 DATA_DIR_LICENSE_ONLY = 'data_license_only/trainVal.csv'
+DATA_DIR_SEGMENTED = 'data_segmented'
+WEIGHTS_DIRECTORY = 'weights/weights'
 TRAIN_TEST_RATIO = 0.10
+VOCAB_SIZE = 36
 
-# Precalculated on current data set
-SEQ_LEN = 8
-VOCAB_SIZE = 37
-
-def train(model, train_inputs, train_labels):
-    for batch_num in range(0, len(train_inputs), model.batch_size):
-        with tf.GradientTape() as tape:
-            logits = model.call(train_inputs[batch_num : batch_num + model.batch_size])
-            loss = model.loss(logits, train_labels[batch_num : batch_num + model.batch_size])
-            #print(loss)
-        gradients = tape.gradient(loss, model.trainable_variables)
-        model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+def train(model, train_inputs, train_labels, test_inputs, test_labels):
+    for e in range(hp.epochs):
+        for batch_num in range(0, len(train_inputs), model.batch_size):
+            # print(batch_num)
+            with tf.GradientTape() as tape:
+                logits = model.call(train_inputs[batch_num : batch_num + model.batch_size])
+                loss = model.loss(logits, train_labels[batch_num : batch_num + model.batch_size])
+            gradients = tape.gradient(loss, model.trainable_variables)
+            model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+        p = model.call(test_inputs)
+        acc = model.accuracy(p, test_labels)
+        print("EPOCH " + str(e) + " | ACCURACY: " + str(acc))
+    
+    # model.save_weights(WEIGHTS_DIRECTORY)
 
 
 def test(model, test_inputs, test_labels):
@@ -33,15 +37,11 @@ def test(model, test_inputs, test_labels):
     return model.accuracy(p, test_labels)
 
 def main():
-    # Use this to train on license plate data only
-    #train_images, train_labels, test_images, test_labels = preprocess_plates.parse_images_and_labels('data_license_only/trainVal.csv', TRAIN_TEST_RATIO)
-
-    # Take note of how txt file in data directory must be formatted for every jpg file included in dataset!! Also, as of rn, must be jpg file but not hard to incorporate other file types.
-    # train_images, train_labels, test_images, test_labels = preprocess.parse_images_and_labels(DATA_DIR, TRAIN_TEST_RATIO)
-
-    train_images, train_labels, test_images, test_labels = preprocess_plates.parse_images_and_labels(DATA_DIR_LICENSE_ONLY, TRAIN_TEST_RATIO)
+    train_images, train_labels, test_images, test_labels = preprocess.parse_images_and_labels(DATA_DIR_SEGMENTED, TRAIN_TEST_RATIO)
     model = CharacterModel()
-    train(model, train_images, train_labels)
+    print(train_images.shape, train_labels.shape, test_images.shape, test_labels.shape)
+    train(model, train_images, train_labels, test_images, test_labels)
+    # model.load_weights(WEIGHTS_DIRECTORY)
     acc = test(model, test_images, test_labels)
     print(acc)
 
