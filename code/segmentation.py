@@ -14,8 +14,8 @@ def cropCharacter(img, dimensions):
 
 def clean_image(img):
     h, w, c = img.shape
-    cv2.imshow('img', img)
-    cv2.waitKey(0)
+    # cv2.imshow('img', img)
+    # cv2.waitKey(0)
     if h > w:
         img = np.rot90(img)
         # cv2.imshow('img', img)
