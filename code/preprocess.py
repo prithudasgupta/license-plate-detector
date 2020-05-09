@@ -14,9 +14,13 @@ def build_dictionaries():
         id2word[id] = char
 
 def get_char_from_id(id):
+    if len(word2id) == 0:
+        build_dictionaries()
     return word2id[id]
 
 def get_id_from_char(char):
+    if len(id2word) == 0:
+        build_dictionaries()
     return id2word[char]
 
 def parse_images_and_labels(directory, train_test_ratio):

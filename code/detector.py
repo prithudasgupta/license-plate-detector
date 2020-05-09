@@ -145,17 +145,17 @@ def get_bounding_box(img):
                     best_contrast = contrast
                     cv2.drawContours(output_image, [box.astype(int)], 0, (127,0,255),2)
                     results.append(box)
-
-    cv2.imshow('image',output_image)
-    cv2.waitKey(0)
-    cv2.imshow('image',best_image)
-    cv2.waitKey(0)
+    #
+    # cv2.imshow('image',output_image)
+    # cv2.waitKey(0)
+    # cv2.imshow('image',best_image)
+    # cv2.waitKey(0)
     return best_image
-
-def main():
-    img = cv2.imread("/Users/spencergreene/Github/license-plate-detector/code/data/4be2025c-09f7-4bb0-b1bd-8e8633e6dec1.jpg", 1)
-    res = get_bounding_box(img)
-    print(res)
-
-
-main()
+#
+# def main():
+#     img = cv2.imread("data/4be2025c-09f7-4bb0-b1bd-8e8633e6dec1.jpg", 1)
+#     res = get_bounding_box(img)
+#     print(res)
+#
+#
+# main()
