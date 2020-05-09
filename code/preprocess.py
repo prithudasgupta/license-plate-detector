@@ -13,6 +13,12 @@ def build_dictionaries():
         word2id[char] = id
         id2word[id] = char
 
+def get_char_from_id(id):
+    return word2id[id]
+
+def get_id_from_char(char):
+    return id2word[char]
+
 def parse_images_and_labels(directory, train_test_ratio):
 
     build_dictionaries()
@@ -26,6 +32,7 @@ def parse_images_and_labels(directory, train_test_ratio):
         img = cv2.imread(directory + "/" + filename, 0)
         img = np.float32(img)
         img = np.reshape(img, (img.shape[0], img.shape[1], 1))
+        img = img / 255.0
         images.append(img)
 
         # Get label

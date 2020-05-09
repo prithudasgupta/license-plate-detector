@@ -19,7 +19,6 @@ VOCAB_SIZE = 36
 def train(model, train_inputs, train_labels, test_inputs, test_labels):
     for e in range(hp.epochs):
         for batch_num in range(0, len(train_inputs), model.batch_size):
-            # print(batch_num)
             with tf.GradientTape() as tape:
                 logits = model.call(train_inputs[batch_num : batch_num + model.batch_size])
                 loss = model.loss(logits, train_labels[batch_num : batch_num + model.batch_size])
@@ -42,8 +41,8 @@ def main():
     print(train_images.shape, train_labels.shape, test_images.shape, test_labels.shape)
     train(model, train_images, train_labels, test_images, test_labels)
     # model.load_weights(WEIGHTS_DIRECTORY)
-    acc = test(model, test_images, test_labels)
-    print(acc)
+    # acc = test(model, test_images, test_labels)
+    # print(acc)
 
 
 
