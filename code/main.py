@@ -4,6 +4,7 @@ import math
 import argparse
 import preprocess
 import glob
+import matplotlib.pyplot as plt
 from detector import (validate_contour, get_bounding_box)
 from model import Model
 import os
@@ -12,6 +13,7 @@ import hyperparameters as hp
 import tensorflow as tf
 from character_model import CharacterModel
 from segmentation import findCharacterContour
+from scipy.interpolate import make_interp_spline
 
 DATA_DIR_BACKGROUNDS = 'data_backgrounds/'
 DATA_DIR_LICENSE_ONLY = 'data_license_only/trainVal.csv'
@@ -42,19 +44,20 @@ def parse_args():
     return parser.parse_args()
 
 def train(model, train_inputs, train_labels, test_inputs, test_labels):
+    loss_values = []
     for e in range(hp.epochs):
         for batch_num in range(0, len(train_inputs), model.batch_size):
             with tf.GradientTape() as tape:
                 logits = model.call(train_inputs[batch_num : batch_num + model.batch_size])
                 loss = model.loss(logits, train_labels[batch_num : batch_num + model.batch_size])
+                loss_values.append(float(loss))
             gradients = tape.gradient(loss, model.trainable_variables)
             model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
         p = model.call(test_inputs)
         acc = float(model.accuracy(p, test_labels))
         model.save_weights(SAVED_WEIGHTS_DIR + 'epoch' + str(e) + '-acc' + str(round(acc, 4)) + '.h5')
         print("EPOCH " + str(e) + " | ACCURACY: " + str(acc))
-    
-    # model.save_weights(WEIGHTS_DIRECTORY)
+    return loss_values
 
 
 def test(model, test_inputs, test_labels):
@@ -71,27 +74,26 @@ def main(ARGS):
 
         os.mkdir(SAVED_WEIGHTS_DIR)
         model = CharacterModel()
-        train(model, train_images, train_labels, test_images, test_labels)
+        loss_values = train(model, train_images, train_labels, test_images, test_labels)
+
+        # Plotting code for loss graph
+        timesteps = list(range(len(loss_values)))
+        a_BSpline = make_interp_spline(timesteps, loss_values)
+        y_smooth = a_BSpline(timesteps)
+        plt.plot(y_smooth)
+        plt.ylabel('loss')
+        plt.xlabel('batch number')
+        plt.show()
+
     elif ARGS.load_weight is not None and ARGS.test_uploaded_image is not None and os.path.exists(ARGS.load_weight) and os.path.exists(ARGS.test_uploaded_image):
 
         img = cv2.imread(ARGS.test_uploaded_image, 1)
         plate = get_bounding_box(img)
-        #
-        # cv2.imshow('image',plate)
-        # cv2.waitKey(0)
-
-
         characters = findCharacterContour(plate)
         characters = np.float32(characters)
-
-        # for c in characters:
-        #     cv2.imshow('image',c)
-        #     cv2.waitKey(0)
-
         characters = np.reshape(characters, (characters.shape[0], characters.shape[1], characters.shape[2], 1))
         characters = characters / 255.0
 
-        print(characters.shape)
         model = CharacterModel()
         model(tf.keras.Input(shape=(100, 50, 1)))
         model.load_weights(ARGS.load_weight)
