@@ -1,6 +1,6 @@
 license-plate-detector
 
-Using feature extraction and CNNs, this project reads in potential images of cars, locates this license plate on the car, and reads the license plate number.
+Using feature extraction and CNNs, this project reads in images of cars, locates the license plate on the car, and reads the license plate number.
 
 To run:
 1. Navigate to the code directory
