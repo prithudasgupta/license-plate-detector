@@ -33,6 +33,9 @@ def parse_images_and_labels(directory, train_test_ratio):
     # Parse image arrays and get associated label
     for filename in os.listdir(directory):
         # Get image as grayscale
+        if filename[-4:] != '.jpg':
+            continue
+
         img = cv2.imread(directory + "/" + filename, 0)
         img = np.float32(img)
         img = np.reshape(img, (img.shape[0], img.shape[1], 1))

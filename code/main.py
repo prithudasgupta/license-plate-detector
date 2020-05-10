@@ -41,6 +41,12 @@ def parse_args():
         default=None,
         help='''Path to image of license plate to read license plate with uploaded trained model weights.'''
     )
+    parser.add_argument(
+        '--needs-detector',
+        action='store_true',
+        help='''Use this flag if license plate in the image needs to be detected first, but do not use this flag if the picture is simply
+        a plate already extracted itself.'''
+    )
     return parser.parse_args()
 
 def train(model, train_inputs, train_labels, test_inputs, test_labels):
@@ -48,6 +54,7 @@ def train(model, train_inputs, train_labels, test_inputs, test_labels):
     for e in range(hp.epochs):
         for batch_num in range(0, len(train_inputs), model.batch_size):
             with tf.GradientTape() as tape:
+                #Classic train for model, gets logits and runs optimizer with loss results per epoch and batch.
                 logits = model.call(train_inputs[batch_num : batch_num + model.batch_size])
                 loss = model.loss(logits, train_labels[batch_num : batch_num + model.batch_size])
                 loss_values.append(float(loss))
@@ -55,6 +62,8 @@ def train(model, train_inputs, train_labels, test_inputs, test_labels):
             model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
         p = model.call(test_inputs)
         acc = float(model.accuracy(p, test_labels))
+
+        #Save weights and print epoch accuracy
         model.save_weights(SAVED_WEIGHTS_DIR + 'epoch' + str(e) + '-acc' + str(round(acc, 4)) + '.h5')
         print("EPOCH " + str(e) + " | ACCURACY: " + str(acc))
     return loss_values
@@ -67,6 +76,8 @@ def test(model, test_inputs, test_labels):
 def main(ARGS):
 
     if ARGS.generate_weights:
+
+        #If training model from scratch, use preprocess pre-segmented license plates (found in data_segmented folder) data and feed train and test sets into model.
         train_images, train_labels, test_images, test_labels = preprocess.parse_images_and_labels(DATA_DIR_SEGMENTED, TRAIN_TEST_RATIO)
 
         if os.path.exists(SAVED_WEIGHTS_DIR):
@@ -85,15 +96,21 @@ def main(ARGS):
         plt.xlabel('batch number')
         plt.show()
 
-    elif ARGS.load_weight is not None and ARGS.test_uploaded_image is not None and os.path.exists(ARGS.load_weight) and os.path.exists(ARGS.test_uploaded_image):
+    elif ARGS.load_weight is not None and ARGS.test_uploaded_image is not None and ARGS.needs_detector is not None and os.path.exists(ARGS.load_weight) and os.path.exists(ARGS.test_uploaded_image):
 
         img = cv2.imread(ARGS.test_uploaded_image, 1)
-        plate = get_bounding_box(img)
-        characters = findCharacterContour(plate)
+
+        #If needs detector is specified, use detector to find and extract license plate.
+        if ARGS.needs_detector:
+            img = get_bounding_box(img)
+
+        #Use segmentation to retrieve individual characters in plate
+        characters = findCharacterContour(img)
         characters = np.float32(characters)
         characters = np.reshape(characters, (characters.shape[0], characters.shape[1], characters.shape[2], 1))
         characters = characters / 255.0
 
+        #Load model and feed image into model to calculate logits and determine the plate string.
         model = CharacterModel()
         model(tf.keras.Input(shape=(100, 50, 1)))
         model.load_weights(ARGS.load_weight)
@@ -102,19 +119,17 @@ def main(ARGS):
         print("Plate number found:", final_plate)
 
     else:
-        print("ERROR: Ensure both trained weights path and an uploaded image path is provided and are both valid paths!")
+        print("ERROR: Ensure both trained weights path and an uploaded image path is provided and are both valid paths! Also, ensure needs_detector flag is there if needed.")
 
 
 def find_license_strings(logits):
+
+    #Find argmax of indices to find which character model believes is each segmented image in plate.
     predictions = tf.cast(tf.argmax(logits, 1), tf.int32)
-
     final_license = ""
-
     for pred in predictions:
         final_license += preprocess.get_id_from_char(int(pred))
-
     return final_license
-
 
 
 if __name__ == "__main__":
