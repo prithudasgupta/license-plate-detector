@@ -4,6 +4,7 @@ from segmentation import findCharacterContour
 import tensorflow as tf
 
 # Script to convert segmented characters into jpg files
+# Only needs to be run once
 vals = open('data_license_only/trainVal.csv', 'r')
 lines = reader(vals)
 count = 0

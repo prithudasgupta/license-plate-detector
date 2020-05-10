@@ -15,3 +15,5 @@ To run:
 
     python3 main.py --load-weight <path_to_weight_in_saved_weights_dir> --test-uploaded-image data_license_only/crop_h4/I00011.png
     ^expected output: 3M46918
+
+4. If --test-uploaded-image is not just an image of a license plate and requires plate detection to be run as well, be sure to specify the --needs-detector flag as well!

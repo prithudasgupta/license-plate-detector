@@ -3,6 +3,11 @@ from csv import reader
 from segmentation import findCharacterContour
 import tensorflow as tf
 
+'''
+NOTE: This was an expirement and leads to poor accuracy.
+    We have transitioned to a single character neural network
+    and its preprocessing code is in preprocess.py
+'''
 def parse_images_and_labels(directory, train_test_ratio):
 
     image_filepaths = []
