@@ -14,12 +14,6 @@ def cropCharacter(img, dimensions):
 
 def clean_image(img):
     h, w, c = img.shape
-    # cv2.imshow('img', img)
-    # cv2.waitKey(0)
-    # if h > w:
-    #     img = np.rot90(img)
-        # cv2.imshow('img', img)
-        # cv2.waitKey(0)
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     resized_img = cv2.resize(gray_img, None, fx=12.0, fy=12.0, interpolation=cv2.INTER_CUBIC)
@@ -40,16 +34,9 @@ def clean_image(img):
     return mask
 
 def findCharacterContour(img):
-    # cv2.imshow('image', img)
-    # cv2.waitKey(0)
     img = clean_image(img)
-    cv2.imshow('image', img)
-    cv2.waitKey(0)
-
     height, width = img.shape
     img_area = height * width
-    # print("height", height)
-    # print("width", width)
 
     plate_characters = []
     bw_image = cv2.bitwise_not(img)
@@ -62,8 +49,6 @@ def findCharacterContour(img):
         area = cv2.contourArea(contour)
         center = (x + w/2, y + h/2)
         # TODO: PLAY AROUND WITH THESE CHECKS
-        # print(float(area/img_area))
-        # print("w:", w, "and h", h)
         if (float(area/img_area) > 0.008) and (float(area/img_area) < 0.032) and h > w:
             x,y,w,h = x-4, y-4, w+8, h+8
             bounding_boxes.append((center, (x,y,w,h)))
@@ -76,10 +61,13 @@ def findCharacterContour(img):
     for center, bbox in bounding_boxes:
         x,y,w,h = bbox
         char_image = clean[y:y+h,x:x+w]
-        char_image = cv2.resize(char_image, (50, 100))
-        cv2.imshow('image', char_image)
-        cv2.waitKey(0)
-        plate_characters.append(char_image)
+        try:
+            char_image = cv2.resize(char_image, (50, 100))
+            # cv2.imshow('image', char_image)
+            # cv2.waitKey(0)
+            plate_characters.append(char_image)
+        except:
+            continue
 
     return np.array(plate_characters)
 
@@ -102,8 +90,4 @@ def reduce_colors(img, n):
 
     return res2
 
-# for filename in os.listdir('data_license_only/crop_h1/'):
-#     if filename.endswith(".png"):
-#         print(filename)
-#         findCharacterContour(cv2.imread('data_license_only/crop_h1/' + filename, 1))
 

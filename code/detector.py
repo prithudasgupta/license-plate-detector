@@ -135,27 +135,12 @@ def get_bounding_box(img):
                     img_crop = np.rot90(img_crop)
                 plate_chars = findCharacterContour(img_crop)
                 right_chars = plate_chars.shape[0] >= 3 and plate_chars.shape[0] <= 8
-                # print('plate_chars.shape', plate_chars.shape)
-                if not right_chars:
-                    continue
-                contrast = img_crop.std()
-                print(contrast)
-                if contrast > best_contrast:
-                    best_image = img_crop
-                    best_contrast = contrast
+                if right_chars:
                     cv2.drawContours(output_image, [box.astype(int)], 0, (127,0,255),2)
-                    results.append(box)
-    #
-    # cv2.imshow('image',output_image)
-    # cv2.waitKey(0)
-    # cv2.imshow('image',best_image)
-    # cv2.waitKey(0)
+                    best_image = img_crop
+
+    cv2.imshow('image',output_image)
+    cv2.waitKey(0)
+    cv2.imshow('image',best_image)
+    cv2.waitKey(0)
     return best_image
-#
-# def main():
-#     img = cv2.imread("data/4be2025c-09f7-4bb0-b1bd-8e8633e6dec1.jpg", 1)
-#     res = get_bounding_box(img)
-#     print(res)
-#
-#
-# main()
