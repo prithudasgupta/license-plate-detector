@@ -2,6 +2,8 @@ license-plate-detector
 
 Using feature extraction and CNNs, this project reads in potential images of cars, locates this license plate on the car, and reads the license plate number.
 
+Our report can be found in docs/final_report.pdf. 
+
 To run:
 1. Navigate to the code directory
 2. Run the command python3 main.py --generate-weights which will train the model from scratch and save model weights to the saved_weights folder.
